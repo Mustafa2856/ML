@@ -64,10 +64,11 @@ class network(object):
         returns the number of correct predictions made from given data
         """
         count=0
-        for i in tqdm(range(img.shape[0])):
+        for i in range(img.shape[0]):
             predicted = self.predict(img[i])
-            p = np.where(predicted==np.max(predicted))
-            if lab[i][p]==1:
+            if predicted>=0.5 and lab[i]==1:
+                count+=1
+            elif predicted<0.5 and lab[i]==0:
                 count+=1
         return count/img.shape[0]
 
@@ -97,10 +98,11 @@ class network(object):
             #ss = step_size*math.exp(-10*accuracy)
             ss = step_size/(accuracy)
             #self.write_trained()
+            '''
             print("epoch ",count)
             print("training accuracy:\t",accuracy)
-            print("test accuracy:\t\t",self.check_accuracy(test_img,test_lab))
-            for i in tqdm(range(train_img.shape[0]//batch_size)):
+            print("test accuracy:\t\t",self.check_accuracy(test_img,test_lab))'''
+            for i in range(train_img.shape[0]//batch_size):
                 for j in range(batch_size):
                     dif = self.predict(train_img[i*batch_size +j]) - train_lab[i*batch_size +j]
                     for k in range(self.layers.__len__()-2,-1,-1):
