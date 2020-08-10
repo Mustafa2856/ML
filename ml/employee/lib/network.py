@@ -1,5 +1,7 @@
 import numpy as np
 from .layer import layer
+from .conv_layer import conv_layer
+from tqdm import tqdm
 import math
 class network(object):
 
@@ -44,6 +46,9 @@ class network(object):
         else:
             self.layers.append(layer(layer_size,-1,activation))
 
+    def add_conv(self,n_filters,filter_shape,input_shape):
+        self.layers.append(conv_layer(n_filters,filter_shape,input_shape))
+
     def predict(self,inputs):
         """
         returns the output for the given inputs
@@ -58,14 +63,18 @@ class network(object):
         """
         returns the number of correct predictions made from given data
         """
-        count=0
-        error = 0
+        err=0
         for i in range(img.shape[0]):
-            predicted = self.predict(img[i])[0]
-            p = lab[i]
-            error += math.fabs(p-predicted)
-        error /= img.shape[0]
-        return error
+            Xpred = self.predict(img[i])
+            err += np.sum((lab[i]-Xpred)*(lab[i] - Xpred))/img.shape[0]
+        return err
+
+    def write_trained(self):
+        out = open("trained","w")
+        out.write(str(self.layers.__len__())+"\n")
+        for i in self.layers:
+            i.write_trained(out)
+
 
     def train(self,data,batch_size,step_size=0.01,epoch=1):
         """
@@ -85,9 +94,10 @@ class network(object):
             accuracy = self.check_accuracy(train_img,train_lab)
             #ss = step_size*math.exp(-10*accuracy)
             ss = step_size
+            #self.write_trained()
+            print("epoch ",count)
             print("training accuracy:\t",accuracy)
-            if data.__len__()==4:
-                print("test accuracy:\t\t",self.check_accuracy(test_img,test_lab))
+            #print("test accuracy:\t\t",self.check_accuracy(test_img,test_lab))
             for i in range(train_img.shape[0]//batch_size):
                 for j in range(batch_size):
                     dif = self.predict(train_img[i*batch_size +j]) - train_lab[i*batch_size +j]
@@ -95,5 +105,4 @@ class network(object):
                         dif = self.layers[k+1].back_prop(dif,self.layers[k],ss)
                 for j in range(self.layers.__len__()-1):
                     self.layers[j+1].grad_param(batch_size)
-
 

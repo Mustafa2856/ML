@@ -1,2 +1,2 @@
 from .network import network
-from .layer import layer
+from .linear import linear

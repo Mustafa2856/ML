@@ -79,7 +79,7 @@ class layer(object):
             elif self.activation=="ReLU":
                 dif *= -np.multiply(self.neurons>0,1)
             elif self.activation=="LeakyReLU":
-                dif *= -(np.multiply(self.neurons>0,1) + np.multiply(self.neurons<0,100))
+                dif *= np.multiply(self.neurons>0,1) + np.multiply(self.neurons<0,100)
             self.gradb += dif * step_size
             self.gradw += np.outer(dif,prev_layer.neurons) * step_size
         return n_dif
@@ -92,3 +92,13 @@ class layer(object):
         self.bias+=self.gradb/batch_size
         self.gradw = np.zeros_like(self.weights)
         self.gradb = np.zeros_like(self.bias)
+
+    def write_trained(self,out):
+        out.write(str(self.size)+"\n")
+        if self.is_input==True:
+            return
+        for i in self.weights:
+            for j in i:
+                out.write(str(j)+"\n")
+        for i in self.bias:
+            out.write(str(i)+"\n")
